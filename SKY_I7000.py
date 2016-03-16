@@ -15,6 +15,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from Tkinter import Tk
 from tkFileDialog import askopenfilename
+import time
 
 
 from matplotlib.dates import date2num, num2date,\
@@ -36,20 +37,21 @@ s=np.size(data[:,1])
 #Define data variables
 freq=(data[1:s,2]).astype(np.float)
 dbm=(data[1:s,3]).astype(np.float)
-time=datestr2num(data[1:s,0])
+time_data=datestr2num(data[1:s,0])
 
-tot_time=num2date(time[-1])-num2date(time[0])
-tot_time=tot_time.seconds
-tot_time=float(tot_time)
-time_d=tot_time/600
+tot_time_data=num2date(time_data[-1])-num2date(time_data[0])
+tot_time_data=tot_time_data.seconds
+tot_time_data=float(tot_time_data)
+time_data_d=tot_time_data/600
 ch=(data[1:s,1]).astype(np.float)
-quan_measure=((num2date(time[-1])-num2date(time[0])).seconds/60.0) / (max(np.diff(num2date(time))).seconds/60.0)
+quan_measure=((num2date(time_data[-1])-num2date(time_data[0])).seconds/60.0) / (max(np.diff(num2date(time_data))).seconds/60.0)
 
 # scatter plot of detections: power vs freq
-fig = plt.figure()
+#fig = plt.figure()
+fig = plt.figure(figsize=(18.8,9.8))
 ab=fig.add_subplot(221)
 ab.scatter(freq,dbm,s=3,c=dbm, lw = 0)
-plt.xlim(min(freq),max(freq))
+#plt.xlim(min(freq)-1000,max(freq)+1000)
 ab.grid()
 plt.xlabel('Frequency [Hz]')
 plt.title('18dB above noise floor detections: levels vs frequency')
@@ -58,13 +60,14 @@ ab.hold
 
 #plot occupancy
 aa = fig.add_subplot(223)
-a=np.histogram(freq,np.unique(freq))
+a=np.histogram(freq,(np.unique(freq)))
+#a=np.histogram(freq,np.unique(freq))
 oc=100*a[0]/quan_measure
 ff=a[1]
 ff=ff[0:-1]
 aa.stem(ff,oc)
 plt.ylim(0,100)
-plt.xlim(min(freq),max(freq))
+#plt.xlim(min(freq),max(freq))
 plt.xlabel('Frequency [Hz]')
 plt.title('Freq Occupancy')
 plt.ylabel('%')
@@ -73,10 +76,10 @@ plt.grid()
 
 
 w = fig.add_subplot(122)
-w.scatter(freq,time,s=7,c=dbm, lw = 0)
+w.scatter(freq,time_data,s=7,c=dbm, lw = 0)
 plt.grid()
-tick_i=np.arange(min(time),max(time)+(max(time)-min(time))/32,(max(time)-min(time))/16)
-tick_label=np.arange(1,len(time)+1,len(time)/16)
+tick_i=np.arange(min(time_data),max(time_data)+(max(time_data)-min(time_data))/32,(max(time_data)-min(time_data))/16)
+tick_label=np.arange(1,len(time_data)+1,len(time_data)/16)
 tlabel=data[tick_label,0]
 lab=tlabel[0][0:16]
 
@@ -86,3 +89,5 @@ for x in tlabel[1::]:
 plt.yticks(tick_i,lab,size='small')
 plt.autoscale(enable=True, axis='both', tight=True)
 plt.title('Detection Plot')
+flnm=time.strftime("%Y%m%d")+"SKY_I7000_plot"
+plt.savefig(flnm,dpi=100)
